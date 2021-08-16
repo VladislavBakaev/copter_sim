@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+	<model name="copter">
+		<pose>0 0 0.0 0 0 0</pose>
+		
+		<link name="link">
+        	<pose>0.0 0.0 0.0 0 0 0</pose>
+        	<collision name="collision">
+				<pose>-0.28875 0.28875 -0.02 1.57 0.0 0.0</pose>
+          		<geometry>
+					<mesh>
+						<uri>model://copter_robot/meshes/drone.dae</uri>
+						<scale>0.002 0.002 0.002</scale>
+					</mesh>
+          		</geometry>
+        	</collision>
+        	<visual name="visual">
+				<pose>-0.28875 0.28875 -0.02 1.57 0.0 0.0</pose>
+				<geometry>
+					<mesh>
+						<uri>model://copter_robot/meshes/drone.dae</uri>
+						<scale>0.002 0.002 0.002</scale>
+					</mesh>
+				</geometry>
+        	</visual>
+
+			<gravity>false</gravity>
+			<sensor name="imu_sensor" type="imu">
+			<always_on>true</always_on>
+			<update_rate>20</update_rate>
+			<visualize>true</visualize>
+			<topic>imu</topic>
+			<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+				<topicName>imu</topicName>
+				<bodyName>link</bodyName>
+				<updateRateHZ>20.0</updateRateHZ>
+				<gaussianNoise>0.0</gaussianNoise>
+				<xyzOffset>0 0 0</xyzOffset>
+				<rpyOffset>0 0 0</rpyOffset>
+				<frameName>link</frameName>
+				<initialOrientationAsReference>false</initialOrientationAsReference>
+			</plugin>
+			<pose>0 0 0 0 0 0</pose>
+			</sensor>
+		</link>
+
+		<plugin name="hand_of_god" filename="libgazebo_ros_hand_of_god.so">
+			<ka>200</ka>
+			<kl>200</kl>
+			<link_name>link</link_name>
+			<frame_id>copter</frame_id>
+		</plugin>
+	</model>
+
+</sdf>

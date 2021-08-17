@@ -1,6 +1,6 @@
 {
-    "accuracy": 2.5,
+    "accuracy": 1.5,
     "rate": 1,
-    "min_distance": 50.0,
+    "min_distance": 10.0,
     "max_distance": 3000.0
 }

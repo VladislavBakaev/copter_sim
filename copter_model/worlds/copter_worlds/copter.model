@@ -11,7 +11,7 @@
     </include>
 
     <scene>
-      <shadows>false</shadows>
+      <shadows>true</shadows>
     </scene>
 
     <physics type="ode">

@@ -37,8 +37,8 @@ class GpsPlugin(Node):
         self.msg = NavSatFix()
 
     def on_timer(self):
-        from_frame_rel = 'world'
-        to_frame_rel = 'copter_actual'
+        from_frame_rel = 'copter_actual'
+        to_frame_rel = 'world'
 
         try:
             now = rclpy.time.Time()
@@ -55,7 +55,7 @@ class GpsPlugin(Node):
 
         self.diff_f = trans.transform.translation.x/current_radius
         self.diff_lam = trans.transform.translation.y/current_radius
-        self.diff_height = -trans.transform.translation.z
+        self.diff_height = trans.transform.translation.z
 
         self.msg.header.stamp = self.get_clock().now().to_msg()
         self.msg.latitude = self.diff_f + self.start_f

@@ -37,6 +37,7 @@ install(DIRECTORY launch include src scripts config
 
 install(
   PROGRAMS
+  scripts/controller.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

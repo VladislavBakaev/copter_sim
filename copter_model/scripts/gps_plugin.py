@@ -8,6 +8,9 @@ from rclpy.node import Node
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
+from ament_index_python.packages import get_package_share_directory
+import os
+import json
 
 from sensor_msgs.msg import NavSatFix
 
@@ -24,13 +27,15 @@ class GpsPlugin(Node):
         self._output_timer = self.create_timer(1/1000, self.on_timer)
         self.pub_gsp = self.create_publisher(NavSatFix, '/ideal_gps', 10)
 
+        self.loadParam()
+
         self.a = 6378206.4
         self.b = 6356583.8
         self.e_2 = 1 - self.b**2/self.a**2
 
-        self.start_f = 55.773037
-        self.start_lam = 37.698766
-        self.start_height = 0
+        # self.start_f = 55.773037
+        # self.start_lam = 37.698766
+        # self.start_height = 0
         self.diff_f = 0
         self.diff_lam = 0
         self.diff_height = 0
@@ -72,6 +77,16 @@ class GpsPlugin(Node):
         z = (self.b**2/self.a**2*N + self.start_height + self.diff_height)*sin(self.start_f+self.diff_f)
 
         return sqrt(x**2 + y**2 + z**2)
+
+    def loadParam(self):
+        config_file = os.path.join(get_package_share_directory('copter_model'),
+                        'config', 'start_config.json')
+
+        with open(config_file, 'r') as json_file:
+            data = json.load(json_file)
+            self.start_f = data['start_latitude']
+            self.start_lam = data['start_longitude']
+            self.start_height = data['start_altitude']
 
 
 def main():

@@ -7,6 +7,7 @@
 #include <tf2_ros/buffer.h>
 #include <math.h>
 #include <iostream>
+#include <random>
 
 using namespace std;
 using std::placeholders::_1;
@@ -57,9 +58,13 @@ class CopterPlugin : public rclcpp::Node
         double fly_angle_r_koef = 0.3;
         double fly_angle_p_koef = 0.3;
 
-        double const_time = 0.1;
+        double const_time = 0.05;
 
         double last_iter = this->now().seconds();
+
+        std::random_device rd{};
+        std::mt19937 gen{rd()};
+        std::normal_distribution<double> d{0.0,0.01};
 
 
         void positionControlTimer()
@@ -117,25 +122,27 @@ class CopterPlugin : public rclcpp::Node
 
         void velocityTimer(){
             if (std::abs(lin_vel_x - cur_lin_vel_x)>0.1){
-                cur_lin_vel_x += (lin_vel_x - cur_lin_vel_x)*const_time;
+                cur_lin_vel_x += (lin_vel_x - cur_lin_vel_x)*const_time + d(gen);
             }
             else{
-                cur_lin_vel_x = lin_vel_x;
+                cur_lin_vel_x = lin_vel_x + d(gen);
             }
 
             if (std::abs(lin_vel_y - cur_lin_vel_y)>0.1){
-                cur_lin_vel_y += (lin_vel_y - cur_lin_vel_y)*const_time;
+                cur_lin_vel_y += (lin_vel_y - cur_lin_vel_y)*const_time + d(gen);
             }
             else{
-                cur_lin_vel_y = lin_vel_y;
+                cur_lin_vel_y = lin_vel_y + d(gen);
             }
 
             if (std::abs(lin_vel_z - cur_lin_vel_z)>0.1){
-                cur_lin_vel_z += (lin_vel_z - cur_lin_vel_z)*const_time;
+                cur_lin_vel_z += (lin_vel_z - cur_lin_vel_z)*const_time + d(gen);
             }
             else{
-                cur_lin_vel_z = lin_vel_z;
+                cur_lin_vel_z = lin_vel_z + d(gen);
             }
+
+            // RCLCPP_INFO(this->get_logger(), "normal: '%f'", d(gen));
         }
 
         tf2::Vector3 convertQuaternion2RPY(const tf2::Quaternion quaternion){

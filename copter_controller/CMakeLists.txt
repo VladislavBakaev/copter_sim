@@ -31,13 +31,16 @@ set(dependencies
   "sensor_msgs"
 )
 
-install(DIRECTORY launch include src scripts config
+install(DIRECTORY launch include src scripts config mission
   DESTINATION share/${PROJECT_NAME}
 )
 
 install(
   PROGRAMS
   scripts/controller.py
+  scripts/complex_data.py
+  scripts/kalmanFilter.py
+  scripts/mission_realizer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

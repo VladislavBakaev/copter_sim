@@ -59,7 +59,7 @@ class Controller(Node):
         self.b = 6356583.8
         self.e_2 = 1 - self.b**2/self.a**2
         self.prop_koef_planar = 1
-        self.prop_koef_height = 1
+        self.prop_koef_height = 0.3
 
 
     def listenerCurrentNavCallback(self, msg):
@@ -76,7 +76,7 @@ class Controller(Node):
             lat_path = (self.target_nav_state.latitude - msg.latitude) * current_radius
             lon_path = (self.target_nav_state.longitude - msg.longitude) * current_radius
             path_module = sqrt(lat_path**2 + lon_path**2)
-            if path_module > 0.2 and sqrt(lat_speed**2+lon_speed**2) > 10**(-10):
+            if path_module > 1.0 and sqrt(lat_speed**2+lon_speed**2) > 10**(-10):
                 lat_proection = lat_path/path_module
                 lon_proection = lon_path/path_module
 
@@ -93,7 +93,7 @@ class Controller(Node):
                     x_vel = x_vel/sqrt(x_vel**2+y_vel**2)*self.maxHSpeed/3
                     y_vel = y_vel/sqrt(x_vel**2+y_vel**2)*self.maxHSpeed/3
 
-            elif sqrt(lat_speed**2+lon_speed**2) < 10**(-10) and path_module > 0.5:
+            elif sqrt(lat_speed**2+lon_speed**2) < 10**(-10) and path_module > 1.0:
                 lat_proection = lat_path/path_module
                 lon_proection = lon_path/path_module
                 x_vel = lat_proection
@@ -105,9 +105,8 @@ class Controller(Node):
             alt_error = self.target_nav_state.altitude - msg.altitude
             if abs(alt_error) > 1:
                 z_vel = self.maxHSpeed*alt_error/abs(alt_error)
-            
-            elif 0.2<abs(alt_error)<1:
-                z_vel = self.maxHSpeed*alt_error
+            elif 0.5 < abs(alt_error) <=1:
+                z_vel = self.maxHSpeed * alt_error
             else:
                 z_vel = 0.0
 

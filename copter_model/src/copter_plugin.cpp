@@ -58,7 +58,7 @@ class CopterPlugin : public rclcpp::Node
         double fly_angle_r_koef = 0.3;
         double fly_angle_p_koef = 0.3;
 
-        double const_time = 0.05;
+        double const_time = 0.2;
 
         double last_iter = this->now().seconds();
 
@@ -136,10 +136,10 @@ class CopterPlugin : public rclcpp::Node
             }
 
             if (std::abs(lin_vel_z - cur_lin_vel_z)>0.1){
-                cur_lin_vel_z += (lin_vel_z - cur_lin_vel_z)*const_time + d(gen);
+                cur_lin_vel_z += (lin_vel_z - cur_lin_vel_z)*const_time;
             }
             else{
-                cur_lin_vel_z = lin_vel_z + d(gen);
+                cur_lin_vel_z = lin_vel_z;
             }
 
             // RCLCPP_INFO(this->get_logger(), "normal: '%f'", d(gen));

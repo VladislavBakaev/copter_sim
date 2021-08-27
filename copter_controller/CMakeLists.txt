@@ -31,7 +31,7 @@ set(dependencies
   "sensor_msgs"
 )
 
-install(DIRECTORY launch include src scripts config mission
+install(DIRECTORY launch scripts mission
   DESTINATION share/${PROJECT_NAME}
 )
 

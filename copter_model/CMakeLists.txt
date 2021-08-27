@@ -51,7 +51,7 @@ set(dependencies
 add_executable(copter_plugin src/copter_plugin.cpp)
 ament_target_dependencies(copter_plugin rclcpp geometry_msgs tf2 tf2_geometry_msgs)
 
-install(DIRECTORY launch include src models worlds scripts config
+install(DIRECTORY launch src models worlds scripts config
   DESTINATION share/${PROJECT_NAME}
 )
 

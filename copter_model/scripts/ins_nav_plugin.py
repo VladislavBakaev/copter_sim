@@ -53,7 +53,7 @@ class InsNavPlugin(Node):
 
         err = [0, 0, 0]
 
-        accuracy_grad = np.array(self.accuracy[:2])/self.getCurrentRadius(msg.latitude, msg.longitude, msg.altitude)*pi/180
+        accuracy_grad = np.array(self.accuracy[:2])/self.getCurrentRadius(msg.latitude, msg.longitude, msg.altitude)*180/pi
         accuracy_grad = accuracy_grad.tolist()
         accuracy_grad.append(self.accuracy[2])
 

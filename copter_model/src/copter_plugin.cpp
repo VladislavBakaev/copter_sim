@@ -1,6 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/point.hpp>
+#include "sensor_msgs/msg/imu.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
@@ -28,6 +29,8 @@ class CopterPlugin : public rclcpp::Node
             subscription_vel_ = this->create_subscription<geometry_msgs::msg::Twist>(
                     "/cmd_vel", 10, std::bind(&CopterPlugin::cmdVelocityCallback, this, _1));
             
+            // publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("/lin_acc", 10);
+            
             odom_tf.transform.translation.x = 0.0;
             odom_tf.transform.translation.y = 0.0;
             odom_tf.transform.translation.z = 0.0;
@@ -39,6 +42,7 @@ class CopterPlugin : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr timer_velocity;
         std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
         geometry_msgs::msg::TransformStamped odom_tf;
+        // rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr publisher_;
 
         double lin_vel_x = 0;
         double lin_vel_y = 0;
@@ -64,8 +68,7 @@ class CopterPlugin : public rclcpp::Node
 
         std::random_device rd{};
         std::mt19937 gen{rd()};
-        std::normal_distribution<double> d{0.0,0.01};
-
+        std::normal_distribution<double> d{0.0,0.005};
 
         void positionControlTimer()
         {
@@ -122,27 +125,30 @@ class CopterPlugin : public rclcpp::Node
 
         void velocityTimer(){
             if (std::abs(lin_vel_x - cur_lin_vel_x)>0.1){
-                cur_lin_vel_x += (lin_vel_x - cur_lin_vel_x)*const_time + d(gen);
+                double delta = (lin_vel_x - cur_lin_vel_x)*const_time + d(gen);
+                cur_lin_vel_x += delta;
             }
             else{
-                cur_lin_vel_x = lin_vel_x + d(gen);
+                cur_lin_vel_x = lin_vel_x;
             }
 
             if (std::abs(lin_vel_y - cur_lin_vel_y)>0.1){
-                cur_lin_vel_y += (lin_vel_y - cur_lin_vel_y)*const_time + d(gen);
+                double delta = (lin_vel_y - cur_lin_vel_y)*const_time + d(gen);
+                cur_lin_vel_y += delta;
             }
             else{
-                cur_lin_vel_y = lin_vel_y + d(gen);
+                cur_lin_vel_y = lin_vel_y;
             }
 
             if (std::abs(lin_vel_z - cur_lin_vel_z)>0.1){
-                cur_lin_vel_z += (lin_vel_z - cur_lin_vel_z)*const_time;
+                double delta = (lin_vel_z - cur_lin_vel_z)*const_time;
+                cur_lin_vel_z += delta;
             }
             else{
                 cur_lin_vel_z = lin_vel_z;
             }
 
-            // RCLCPP_INFO(this->get_logger(), "normal: '%f'", d(gen));
+            // RCLCPP_INFO(this->get_logger(), "x: '%f', y: '%f', z: '%f'", lin_x_acc, lin_y_acc, lin_z_acc);
         }
 
         tf2::Vector3 convertQuaternion2RPY(const tf2::Quaternion quaternion){

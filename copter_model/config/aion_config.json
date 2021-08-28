@@ -1,5 +1,5 @@
 {
-    "accuracy_lon": 0.5,
-    "accuracy_lat": 0.5,
+    "accuracy_lon": 10.0,
+    "accuracy_lat": 10.0,
     "rate": 1
 }

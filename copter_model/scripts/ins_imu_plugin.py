@@ -67,9 +67,9 @@ class InsImuPlugin(Node):
         msg.angular_velocity.y += angular_vel_err[1]
         msg.angular_velocity.z += angular_vel_err[2]
 
-        msg.linear_acceleration.x += linear_acc_err[0] 
-        msg.linear_acceleration.y += linear_acc_err[1]
-        msg.linear_acceleration.z += linear_acc_err[2]
+        msg.linear_acceleration.x = msg.linear_acceleration.x + linear_acc_err[0] 
+        msg.linear_acceleration.y = msg.linear_acceleration.y + linear_acc_err[1]
+        msg.linear_acceleration.z = msg.linear_acceleration.z + linear_acc_err[2]
 
         return msg
 

@@ -54,7 +54,7 @@ class AionPlugin(Node):
 
         err = [0, 0]
 
-        accuracy_grad = np.array(self.accuracy)/self.getCurrentRadius(msg.latitude, msg.longitude, msg.altitude)*pi/180
+        accuracy_grad = np.array(self.accuracy)/self.getCurrentRadius(msg.latitude, msg.longitude, msg.altitude)*180/pi
 
         for i, _ in enumerate(err):
             w = np.random.rand()

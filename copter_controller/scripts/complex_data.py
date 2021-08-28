@@ -6,13 +6,15 @@ from rclpy.node import Node
 from sensor_msgs.msg import Range
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Imu
+from math import sqrt, sin, cos, pi
 
-from kalmanFilter import KalmanFilter
+from kalmanFilter import KalmanFilterComplex
+from complexTool import ImuData
 
 class ComplexData(Node):
     def __init__(self):
         rclpy.init()
-        super().__init__('complex_data_plot')
+        super().__init__('complex_data')
 
         self.nodeName = self.get_name()
         self.get_logger().info("{0} started".format(self.nodeName))
@@ -45,56 +47,56 @@ class ComplexData(Node):
             self.listenerLaserCallback,
             qos_profile=qos_policy)
 
-        self.filtredInsNavPub = self.create_publisher(NavSatFix, '/filter/ins_nav_topic', 10)
-        self.filtredInsImuPub = self.create_publisher(Imu, '/filter/ins_imu_topic', 10)
-        self.filtredAionPub = self.create_publisher(NavSatFix, '/filter/aion_nav_topic', 10)
-        self.filtredLaserPub = self.create_publisher(Range, '/filter/laser_dist_topic', 10)
         self.complexNavPub = self.create_publisher(NavSatFix, '/complex_nav_topic', 10)
 
-        self.insNavFilter = KalmanFilter(3)
-        self.insImuFilter = KalmanFilter(10)
-        self.aionNavFilter = KalmanFilter(2)
-        self.laserDistFilter = KalmanFilter(1)
+        self.imuData = ImuData()
+        self.complexFilter = KalmanFilterComplex()
+
+        self.start_latitude = 55.773037
+        self.start_longitude = 37.698766
+
+        self.a = 6378206.4
+        self.b = 6356583.8
+        self.e_2 = 1 - self.b**2/self.a**2
+
+        self.northSns = 0
+        self.eastSns = 0
+        self.heightSns = 0
+
+        self.northAion = 0
+        self.eastAion = 0
+        self.heightLaser = 0
 
     def listenerInsNavCallback(self, msg):
-        filtered_value = self.insNavFilter.getValue([msg.latitude, msg.longitude, msg.altitude])
-        msg.latitude = filtered_value[0]
-        msg.longitude = filtered_value[1]
-        msg.altitude = filtered_value[2]
-        self.filtredInsNavPub.publish(msg)
-        self.complexNavPub.publish(msg)
+        current_radius = self.get_current_radius(msg.latitude,\
+                                                 msg.longitude,\
+                                                 msg.altitude)
+        self.northSns = (msg.latitude - self.start_latitude)*current_radius*pi/180
+        self.eastSns = (msg.longitude - self.start_longitude)*current_radius*pi/180
+        self.heightSns = msg.altitude
     
     def listenerInsImuCallback(self, msg):
-        filtered_value = self.insImuFilter.getValue([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w,
-                                                     msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z,
-                                                     msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z])
-        msg.orientation.x = filtered_value[0]
-        msg.orientation.y = filtered_value[1]
-        msg.orientation.z = filtered_value[2]
-        msg.orientation.w = filtered_value[3]
-
-        msg.angular_velocity.x = filtered_value[4]
-        msg.angular_velocity.y = filtered_value[5]
-        msg.angular_velocity.z = filtered_value[6]
-
-        msg.linear_acceleration.x = filtered_value[7]
-        msg.linear_acceleration.y = filtered_value[8]
-        msg.linear_acceleration.z = filtered_value[9]
-        self.filtredInsImuPub.publish(msg)
+        self.imuData.update_date([msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z])
 
     def listenerAionCallback(self, msg):
-        filtered_value = self.aionNavFilter.getValue([msg.latitude, msg.longitude])
-        msg.latitude = filtered_value[0]
-        msg.longitude = filtered_value[1]
-        self.filtredAionPub.publish(msg)
+        current_radius = self.get_current_radius(msg.latitude,\
+                                                 msg.longitude,\
+                                                 msg.altitude)
+        self.northAion = (msg.latitude - self.start_latitude)*current_radius*pi/180
+        self.eastAion = (msg.longitude - self.start_longitude)*current_radius*pi/180
 
     def listenerLaserCallback(self, msg):
-        filtered_value = self.laserDistFilter.getValue([msg.range])
-        msg.range = filtered_value[0]
-        self.filtredLaserPub.publish(msg)
+        self.heightLaser = msg.range
 
-    def filterParamInit(self):
-        self.insNavFilter.weight_k = 0.7
+    def get_current_radius(self, lat, lon, alt):
+        N = self.a/(sqrt(1-self.e_2*sin(lat)**2))
+
+        x = (N + alt)*cos(lat)*cos(lon)
+        y = (N + alt)*cos(lat)*sin(lon)
+
+        z = (self.b**2/self.a**2*N + alt)*sin(lat)
+
+        return sqrt(x**2 + y**2 + z**2)
 
 def main():
     node = ComplexData()

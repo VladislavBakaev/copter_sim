@@ -41,6 +41,7 @@ install(
   scripts/complex_data.py
   scripts/kalmanFilter.py
   scripts/mission_realizer.py
+  scripts/complexTool.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

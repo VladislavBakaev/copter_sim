@@ -63,6 +63,7 @@ install(
   scripts/gps_plugin.py
   scripts/ins_imu_plugin.py
   scripts/spawn_copter.py
+  scripts/imu_plugin.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

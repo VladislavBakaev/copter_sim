@@ -48,4 +48,8 @@ def generate_launch_description():
             executable='laser_dist_plugin.py', 
             name="laser_dist_plugin",
             output='screen'),
+        Node(package='copter_model', 
+            executable='imu_plugin.py', 
+            name="imu_plugin",
+            output='screen'),
     ])

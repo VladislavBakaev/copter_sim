@@ -14,13 +14,13 @@ def generate_launch_description():
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
 
-        Node(package='copter_controller', 
-            executable='complex_data.py', 
-            name="complex_data",
-            output='screen'),
+        # Node(package='copter_controller', 
+        #     executable='complex_data.py', 
+        #     name="complex_data",
+        #     output='screen'),
         
-        Node(package='copter_controller', 
-            executable='controller.py', 
-            name="controller",
-            output='screen'),
+        # Node(package='copter_controller', 
+        #     executable='controller.py', 
+        #     name="controller",
+        #     output='screen'),
     ])

@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Int16
 import time
-from math import sqrt, sin, cos
+from math import sqrt, sin, cos, pi
 
 class Controller(Node):
 
@@ -67,14 +67,14 @@ class Controller(Node):
             current_radius = self.get_current_radius(msg.latitude, msg.longitude, msg.altitude)
 
             time_delta = msg.header.stamp.nanosec-self.current_nav_state.header.stamp.nanosec
-            lat_speed = (msg.latitude*current_radius - self.current_nav_state.latitude*current_radius)/time_delta
-            lon_speed = (msg.longitude*current_radius - self.current_nav_state.longitude*current_radius)/time_delta
+            lat_speed = (msg.latitude*current_radius - self.current_nav_state.latitude*current_radius)*pi/180/time_delta
+            lon_speed = (msg.longitude*current_radius - self.current_nav_state.longitude*current_radius)*pi/180/time_delta
 
             lat_speed_proection = lat_speed/sqrt(lat_speed**2 + lon_speed**2)
             lon_speed_proection = lon_speed/sqrt(lat_speed**2 + lon_speed**2)
 
-            lat_path = (self.target_nav_state.latitude - msg.latitude) * current_radius
-            lon_path = (self.target_nav_state.longitude - msg.longitude) * current_radius
+            lat_path = (self.target_nav_state.latitude - msg.latitude) * current_radius*pi/180
+            lon_path = (self.target_nav_state.longitude - msg.longitude) * current_radius*pi/180
             path_module = sqrt(lat_path**2 + lon_path**2)
             if path_module > 1.0 and sqrt(lat_speed**2+lon_speed**2) > 10**(-10):
                 lat_proection = lat_path/path_module
@@ -113,7 +113,7 @@ class Controller(Node):
 
             # self.get_logger().info("latitude speed {0}, longitude speed {1}".format(lat_speed_proection, lon_speed_proection))
             # self.get_logger().info("latitude speed {0}, longitude speed {1}".format(x_vel, y_vel))
-            # self.get_logger().info("path {0}, alt err {1}".format(path_module, alt_error))
+            self.get_logger().info("path {0}, alt err {1}".format(path_module, alt_error))
             # self.get_logger().info("lat error {0}, lon error {1}".format(x_vel, y_vel))
 
             msg_vel = Twist()

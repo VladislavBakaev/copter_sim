@@ -22,7 +22,7 @@ class ImuData():
         self.eastIns = Decimal(0)
 
         self.kalman = KalmanFilter(3)
-        self.kalman.weight_k = 0.35
+        self.kalman.weight_k = 0.5
 
         thread = threading.Thread(target=self.integrateData, args=(Decimal(1/20),))
         thread.start()

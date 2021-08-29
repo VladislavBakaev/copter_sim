@@ -6,36 +6,29 @@ MaxHSpeed=2.0
 MaxVSpeed=6.0
 
 [1]
-Lat=55.7730380
-Lon=37.6987660
+Lat=55.773194
+Lon=37.698778
 Alt=4.0
 MaxHSpeed=2.0
 MaxVSpeed=6.0
 
 [2]
-Lat=55.773038
-Lon=37.698767
+Lat=55.773194
+Lon=37.698889
 Alt=2.0
 MaxHSpeed=2.0
 MaxVSpeed=6.0
 
 [3]
-Lat=55.773037
-Lon=37.698767
+Lat=55.773056
+Lon=37.698889
 Alt=2.0
 MaxHSpeed=2.0
 MaxVSpeed=6.0
 
 [4]
-Lat=55.773037
-Lon=37.698766
+Lat=55.7730370
+Lon=37.6987660
 Alt=2.0
-MaxHSpeed=2.0
-MaxVSpeed=6.0
-
-[5]
-Lat=55.773037
-Lon=37.698766
-Alt=0.0
 MaxHSpeed=2.0
 MaxVSpeed=6.0

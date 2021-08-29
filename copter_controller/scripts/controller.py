@@ -67,8 +67,8 @@ class Controller(Node):
             current_radius = self.get_current_radius(msg.latitude, msg.longitude, msg.altitude)
 
             time_delta = msg.header.stamp.nanosec-self.current_nav_state.header.stamp.nanosec
-            lat_speed = (msg.latitude*current_radius - self.current_nav_state.latitude*current_radius)*pi/180/time_delta
-            lon_speed = (msg.longitude*current_radius - self.current_nav_state.longitude*current_radius)*pi/180/time_delta
+            lat_speed = (msg.latitude*current_radius - self.current_nav_state.latitude*current_radius)*time_delta
+            lon_speed = (msg.longitude*current_radius - self.current_nav_state.longitude*current_radius)*time_delta
 
             lat_speed_proection = lat_speed/sqrt(lat_speed**2 + lon_speed**2)
             lon_speed_proection = lon_speed/sqrt(lat_speed**2 + lon_speed**2)
@@ -103,17 +103,17 @@ class Controller(Node):
                 y_vel = 0.0
 
             alt_error = self.target_nav_state.altitude - msg.altitude
-            if abs(alt_error) > 1:
-                z_vel = self.maxHSpeed*alt_error/abs(alt_error)
-            elif 0.5 < abs(alt_error) <=1:
-                z_vel = self.maxHSpeed * alt_error
+            if abs(alt_error) > self.maxVSpeed:
+                z_vel = self.maxVSpeed*alt_error/abs(alt_error)
+            elif abs(alt_error)>0.2:
+                z_vel = alt_error
             else:
                 z_vel = 0.0
 
 
             # self.get_logger().info("latitude speed {0}, longitude speed {1}".format(lat_speed_proection, lon_speed_proection))
             # self.get_logger().info("latitude speed {0}, longitude speed {1}".format(x_vel, y_vel))
-            self.get_logger().info("path {0}, alt err {1}".format(path_module, alt_error))
+            # self.get_logger().info("path {0}, alt err {1}".format(path_module, alt_error))
             # self.get_logger().info("lat error {0}, lon error {1}".format(x_vel, y_vel))
 
             msg_vel = Twist()
@@ -130,7 +130,6 @@ class Controller(Node):
         self.current_nav_state = msg
 
     def listenerTargetNavCallback(self, msg):
-        print(msg)
         self.target_nav_state = msg
         self.maxHSpeed = self.target_nav_state.position_covariance[0]
         self.maxVSpeed = self.target_nav_state.position_covariance[1]

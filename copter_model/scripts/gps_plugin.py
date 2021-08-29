@@ -14,7 +14,7 @@ import json
 
 from sensor_msgs.msg import NavSatFix
 
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, pi
 
 class GpsPlugin(Node):
 
@@ -58,8 +58,8 @@ class GpsPlugin(Node):
 
         current_radius = self.get_current_radius()
 
-        self.diff_f = trans.transform.translation.x/current_radius
-        self.diff_lam = trans.transform.translation.y/current_radius
+        self.diff_f = trans.transform.translation.x/current_radius*180/pi
+        self.diff_lam = trans.transform.translation.y/current_radius*180/pi
         self.diff_height = trans.transform.translation.z
 
         self.msg.header.stamp = self.get_clock().now().to_msg()

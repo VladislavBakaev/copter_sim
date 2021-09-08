@@ -8,6 +8,9 @@ from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Bool
 from math import sqrt, sin, cos, pi
+from ament_index_python.packages import get_package_share_directory
+import os
+import json
 
 from kalmanFilter import KalmanFilterComplex
 from complexTool import ImuData
@@ -53,6 +56,8 @@ class ComplexData(Node):
             '/antispoof_topic',
             self.listenerAntispoofCallback,
             qos_profile=qos_policy)
+        
+        self.loadParam()
 
         self.complexNavPub = self.create_publisher(NavSatFix, '/complex_nav_topic', 10)
         self.imuNavPub = self.create_publisher(NavSatFix, '/imu_nav_data_topic', 10)
@@ -60,9 +65,6 @@ class ComplexData(Node):
         self.imuData = ImuData()
         self.complexFilterSns = KalmanFilterComplex()
         self.complexFilterAion = KalmanFilterComplex()
-
-        self.start_latitude = 55.773037
-        self.start_longitude = 37.698766
 
         self.a = 6378206.4
         self.b = 6356583.8
@@ -120,21 +122,21 @@ class ComplexData(Node):
         self.antispoofStatus = msg.data
     
     def publishComplexData(self):
-        ins_sns_err = [self.northSns,\
-                       self.heightSns,\
-                       self.eastSns]
+        # ins_sns_err = [self.northSns,\
+        #                self.heightSns,\
+        #                self.eastSns]
 
-        ins_aion_err = [self.northAion,\
-                       self.heightLaser,\
-                       self.eastAion]
+        # ins_aion_err = [self.northAion,\
+        #                self.heightLaser,\
+        #                self.eastAion]
 
-        # ins_sns_err = [float(self.imuData.northIns) - self.northSns,\
-        #                float(self.imuData.heightIns) - self.heightSns,\
-        #                float(self.imuData.eastIns) - self.eastSns]
+        ins_sns_err = [float(self.imuData.northIns) - self.northSns,\
+                       float(self.imuData.heightIns) - self.heightSns,\
+                       float(self.imuData.eastIns) - self.eastSns]
 
-        # ins_aion_err = [float(self.imuData.northIns) - self.northAion,\
-        #                float(self.imuData.heightIns) - self.heightLaser,\
-        #                float(self.imuData.eastIns) - self.eastAion]
+        ins_aion_err = [float(self.imuData.northIns) - self.northAion,\
+                       float(self.imuData.heightIns) - self.heightLaser,\
+                       float(self.imuData.eastIns) - self.eastAion]
 
         imu_latitude = self.start_latitude + float(self.imuData.northIns)/self.current_radius*180/pi
         imu_longitude = self.start_longitude + float(self.imuData.eastIns)/self.current_radius*180/pi
@@ -150,12 +152,12 @@ class ComplexData(Node):
         self.complexFilterSns.kalmanUpdate(ins_sns_err, [0,0,0])
         self.complexFilterAion.kalmanUpdate(ins_aion_err, [0,0,0])
         if not self.antispoofStatus:
-            latitude = self.start_latitude + self.complexFilterSns.xErr[0]/self.current_radius*180/pi
-            longitude = self.start_longitude + self.complexFilterSns.xErr[2]/self.current_radius*180/pi
-            altitude = self.complexFilterSns.xErr[1]
-            # latitude = self.start_latitude + (self.northSns + self.complexFilterSns.xErr[0])/self.current_radius*180/pi
-            # longitude = self.start_longitude + (self.eastSns + self.complexFilterSns.xErr[2])/self.current_radius*180/pi
-            # altitude = self.heightSns + self.complexFilterSns.xErr[1]
+            # latitude = self.start_latitude + self.complexFilterSns.xErr[0]/self.current_radius*180/pi
+            # longitude = self.start_longitude + self.complexFilterSns.xErr[2]/self.current_radius*180/pi
+            # altitude = self.complexFilterSns.xErr[1]
+            latitude = self.start_latitude + (self.northSns + self.complexFilterSns.xErr[0])/2/self.current_radius*180/pi
+            longitude = self.start_longitude + (self.eastSns + self.complexFilterSns.xErr[2]/2)/self.current_radius*180/pi
+            altitude = self.heightSns + self.complexFilterSns.xErr[1]/2
         else:
             latitude = self.start_latitude + self.complexFilterSns.xErr[0]/self.current_radius*180/pi
             longitude = self.start_longitude + self.complexFilterSns.xErr[2]/self.current_radius*180/pi
@@ -170,6 +172,16 @@ class ComplexData(Node):
         msg.altitude = altitude
         msg.header.stamp = self.get_clock().now().to_msg()
         self.complexNavPub.publish(msg)
+
+    def loadParam(self):
+        config_file = os.path.join(get_package_share_directory('copter_model'),
+                        'config', 'start_config.json')
+
+        with open(config_file, 'r') as json_file:
+            data = json.load(json_file)
+            self.start_latitude = data['start_latitude']
+            self.start_longitude = data['start_longitude']
+            self.start_height = data['start_altitude']
 
 def main():
     node = ComplexData()
